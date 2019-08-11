@@ -21,12 +21,15 @@ The library provides the following routines:
 **BME280setI2Caddress(address)** - specifies the I2C address. This should be called before **BME280setup()**. You don't need to call this if you are using the default I2C address, 0x77.
 
 **BME280setup()** - sets up the BME280 into its normal measurement mode, with no upsampling, and reads the fixed calibrations from the sensor. You should call this in setup().
+Takes one argument, the mode to set. By default is normal mode. Use `MODE_SLEEP` to use sleep mode instead, then call BME280ForceMeasurement() to take a measurement.
 
 **BME280temperature()** - gives the temperature as a signed 32-bit integer in °C with a resolution of 0.01°C. So an output value of “5123” equals 51.23°C.
 
 **BME280pressure()** - gives the pressure in Pa as an unsigned 32-bit integer, so an output value of “96386” equals 96386 Pa, or 963.86 hPa.
 
 **BME280humidity()** - gives the humidity in %RH with a resolution of 0.01%RH, so an output value of “4653” represents 46.53 %RH.
+
+**BME280ForceMeasurement()** - If you're in sleep mode, takes a measurement and then re-enters sleep mode. Once the measurement is taken, you can use BME280temperature(), BME280Ppressure(), and/or BME280humidity() to read the data.
 
 #### Altitude
 

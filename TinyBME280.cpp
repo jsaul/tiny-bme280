@@ -32,14 +32,14 @@ void BME280setI2Caddress (uint8_t address) {
 }
 
 // Must be called once at start
-void BME280setup () {
+void BME280setup (int mode) {
   delay(2);
   // Set the mode to Normal, no upsampling
   Wire.beginTransmission(BME280address);
   Wire.write(0xF2);                             // ctrl_hum
   Wire.write(0b00000001);
   Wire.write(0xF4);                             // ctrl_meas
-  Wire.write(0b00100111);
+  Wire.write(0b00100100 | mode);                  
   // Read the chip calibrations.
   Wire.write(0x88);
   Wire.endTransmission();
@@ -127,4 +127,28 @@ uint32_t BME280humidity () {
   var1 = (var1 < 0 ? 0 : var1);
   var1 = (var1 > 419430400 ? 419430400 : var1);
   return (uint32_t)((var1>>12)*25)>>8;
+}
+
+// Take a forced measurement.
+// It's assumed the BME280 is in sleep mode. It'll be set to Forced mode, take
+// the measurement, then automatically return to sleep mode after the measurement
+// is complete.
+void BME280ForceMeasurement () {
+  Wire.beginTransmission(BME280address);
+  Wire.write(0xF4);                             // ctrl_meas
+  Wire.write(0b00100101);                       // forced mode
+  Wire.endTransmission();
+
+  while (1) {
+    uint8_t x;
+    Wire.beginTransmission(BME280address);
+    Wire.write(0xF3);                           // status_Reg
+    Wire.endTransmission();
+    Wire.requestFrom(BME280address, 1);
+    x = Wire.read();
+    if ((x  & 0x08) == 0) {                     // bit3, "measuring"
+      return;
+    }
+    delay(1);
+  }
 }
